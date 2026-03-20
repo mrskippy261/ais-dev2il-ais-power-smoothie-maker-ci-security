@@ -165,9 +165,11 @@ uv run main.py
 | Command | Description |
 |---|---|
 | `uv init` | Initializes a new project, creating `pyproject.toml`. |
-| `uv add <package>` | Adds a dependency to the project and installs it. |
+| `uv add <package>` | Adds a runtime dependency to the project and installs it. |
+| `uv add --dev <package>` | Adds a development-only dependency (e.g., pytest, ruff). |
 | `uv remove <package>` | Removes a dependency from the project. |
 | `uv run ...` | Runs a command within the project's managed environment. |
+| `uv lock` | Updates `uv.lock` with the exact resolved dependency versions. |
 | `uv sync` | Installs dependencies from `uv.lock` to exactly recreate the environment. |
 
 
@@ -183,13 +185,62 @@ uv run main.py
 
 ### 🚀 Level Up
 
-Finished early? Put your `uv` skills to the next level with these "Pro" moves.
+Finished early? Put your `uv` skills to the next level with these “Pro” moves.
 
+#### 1) Use `uv run` for everything (no manual venv activation)
 
-#### `uv tree`
-This command displays the dependency tree of your project. It's incredibly useful for a few reasons:
+You already set up the project earlier. The “level up” move is to **stop thinking about activating a venv** and just run everything through `uv`:
+
+```bash
+uv run python main.py
+```
+
+Using `uv` to run all your commands will automatically manage and activate the virtual environment
+for you.
+
+#### 2) Locking & Reproducibility (`uv.lock`)
+
+- `pyproject.toml` describes what you *want* (your dependency intent).
+- `uv.lock` records what you *actually got* (exact, resolved versions).
+
+When you commit `uv.lock`, your teammate (and later CI) can recreate the exact same environment.
+
+You can update the lockfile when dependencies change:
+```bash
+uv lock
+```
+
+Install dependencies **from the lockfile** (e.g. after cloning or pulling changes):
+```bash
+uv sync
+```
+
+This recreates the environment from `uv.lock` so you get the exact same resolved versions as everyone else.
+
+If you want to be strict (common in CI), use:
+```bash
+uv sync --frozen
+```
+This will fail if the lockfile is missing/out-of-date instead of silently re-resolving.
+
+#### 3) Dependency groups (dev vs runtime)
+
+Keep **runtime dependencies** (needed to run `main.py`) separate from **dev dependencies** (only needed for development/testing).
+
+Example: add a dev dependency (like `pytest`) into a dev group:
+```bash
+uv add --dev pytest
+```
+
+You’ll see a `[dependency-groups]` section in `pyproject.toml` where dev tools live.
+
+We'll make use of this knowledge in a later step in our course!
+
+#### 4) `uv tree`
+
+This command displays the dependency tree of your project.
 - **Visibility**: See exactly which packages are included and which package brought them in.
-- **Debugging**: Helps you track down where a specific dependency is coming from, which is a lifesaver for resolving version conflicts.
+- **Debugging**: Helps you track down where a specific dependency is coming from.
 
 Try it out:
 ```bash
